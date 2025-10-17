@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tienda de Ropa</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: url('images.jpeg') no-repeat center center fixed;
+      background-size: cover;
+      color: #333;
+    }
+    header {
+      background: rgba(17,17,17,0.9);
+      color: #fff;
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    nav a {
+      color: #fff;
+      margin: 0 10px;
+      text-decoration: none;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    nav a:hover {
+      text-decoration: underline;
+    }
+    .container {
+      max-width: 1200px;
+      margin: auto;
+      padding: 20px;
+      background: rgba(255,255,255,0.9);
+      border-radius: 10px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 20px;
+    }
+    .card {
+      background: #fff;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      transition: transform 0.2s;
+    }
+    .card:hover {
+      transform: scale(1.02);
+    }
+    .card img {
+      width: 100%;
+      height: 250px;
+      object-fit: cover;
+    }
+    .info {
+      padding: 15px;
+    }
+    .info h3 {
+      margin: 0 0 5px;
+    }
+    .price {
+      color: #e91e63;
+      font-weight: bold;
+      font-size: 18px;
+    }
+    .btn {
+      display: inline-block;
+      background: #111;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      padding: 8px 12px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    .btn:hover {
+      background: #e91e63;
+    }
+    footer {
+      text-align: center;
+      background: rgba(17,17,17,0.9);
+      color: #fff;
+      padding: 15px;
+      margin-top: 30px;
+    }
+    /* Carrito */
+    #carrito {
+      position: fixed;
+      top: 80px;
+      right: 20px;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      width: 300px;
+      padding: 15px;
+      display: none;
+    }
+    #carrito h3 {
+      margin-top: 0;
+    }
+    #listaCarrito div {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 5px;
+    }
+    #total {
+      font-weight: bold;
+      margin-top: 10px;
+      text-align: right;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Tienda de Ropa</h1>
+    <nav>
+      <a onclick="mostrarSeccion('hombre')">Hombre</a>
+      <a onclick="mostrarSeccion('mujer')">Mujer</a>
+      <a onclick="mostrarSeccion('accesorios')">Accesorios</a>
+      <a onclick="toggleCarrito()">🛒 Carrito (<span id="contador">0</span>)</a>
+    </nav>
+  </header>
+
+  <div class="container">
+    <h2 id="tituloSeccion">Ropa de Hombre</h2>
+    <div id="productos" class="grid"></div>
+  </div>
+
+  <div id="carrito">
+    <h3>Carrito de Compras</h3>
+    <div id="listaCarrito"></div>
+    <div id="total">Total: $0</div>
+    <button class="btn" onclick="pagar()">Finalizar Compra</button>
+  </div>
+
+  <footer>
+    © 2025 Tienda de Ropa. Todos los derechos reservados.
+  </footer>
+
+  <script>
+    const productos = {
+      hombre: [
+        { nombre: "Camiseta Negra", precio: 14990, imagen: "https://i.postimg.cc/pdLZj3ZW/camiseta-negra.jpg" },
+        { nombre: "Chaqueta de Cuero", precio: 54990, imagen: "https://i.postimg.cc/yNPLdRk5/chaqueta-cuero.jpg" },
+        { nombre: "Jeans Azul", precio: 29990, imagen: "https://i.postimg.cc/fL9HDQJ1/jeans.jpg" }
+      ],
+      mujer: [
+        { nombre: "Vestido Floral", precio: 29990, imagen: "https://i.postimg.cc/fR7m7wmX/vestido-floral.jpg" },
+        { nombre: "Blusa Blanca", precio: 19990, imagen: "https://i.postimg.cc/GppHhJST/camiseta-blanca.jpg" },
+        { nombre: "Falda Plisada", precio: 24990, imagen: "https://i.postimg.cc/c4nkwm8L/falda.jpg" }
+      ],
+      accesorios: [
+        { nombre: "Gorra Negra", precio: 9990, imagen: "https://i.postimg.cc/LXyzf8td/gorra.jpg" },
+        { nombre: "Bufanda de Lana", precio: 12990, imagen: "https://i.postimg.cc/HjD8rWjF/bufanda.jpg" }
+      ]
+    };
+
+    let carrito = [];
+    let categoriaActual = "hombre";
+
+    function mostrarSeccion(categoria) {
+      categoriaActual = categoria;
+      document.getElementById("tituloSeccion").textContent =
+        categoria === "hombre" ? "Ropa de Hombre" :
+        categoria === "mujer" ? "Ropa de Mujer" : "Accesorios";
+      const contenedor = document.getElementById("productos");
+      contenedor.innerHTML = "";
+      productos[categoria].forEach((p, index) => {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `
+          <img src="${p.imagen}" alt="${p.nombre}">
+          <div class="info">
+            <h3>${p.nombre}</h3>
+            <p class="price">$${p.precio.toLocaleString()}</p>
+            <button class="btn" onclick="agregarCarrito('${categoria}', ${index})">Agregar al carrito</button>
+          </div>
+        `;
+        contenedor.appendChild(card);
+      });
+    }
+
+    function agregarCarrito(cat, index) {
+      const producto = productos[cat][index];
+      carrito.push(producto);
+      actualizarCarrito();
+      alert(`Agregado: ${producto.nombre}`);
+    }
+
+    function actualizarCarrito() {
+      const lista = document.getElementById("listaCarrito");
+      const contador = document.getElementById("contador");
+      const totalEl = document.getElementById("total");
+
+      lista.innerHTML = "";
+      let total = 0;
+
+      carrito.forEach((item, i) => {
+        total += item.precio;
+        const div = document.createElement("div");
+        div.innerHTML = `
+          ${item.nombre} <span>$${item.precio.toLocaleString()}</span>
+          <button onclick="eliminarItem(${i})">❌</button>
+        `;
+        lista.appendChild(div);
+      });
+
+      contador.textContent = carrito.length;
+      totalEl.textContent = "Total: $" + total.toLocaleString();
+    }
+
+    function eliminarItem(index) {
+      carrito.splice(index, 1);
+      actualizarCarrito();
+    }
+
+    function toggleCarrito() {
+      const c = document.getElementById("carrito");
+      c.style.display = c.style.display === "block" ? "none" : "block";
+    }
+
+    function pagar() {
+      if (carrito.length === 0) {
+        alert("El carrito está vacío.");
+        return;
+      }
+      alert("Gracias por tu compra 🛍️ Total: $" + carrito.reduce((t,p)=>t+p.precio,0).toLocaleString());
+      carrito = [];
+      actualizarCarrito();
+      toggleCarrito();
+    }
+
+    mostrarSeccion("hombre");
+  </script>
+</body>
+</html>
